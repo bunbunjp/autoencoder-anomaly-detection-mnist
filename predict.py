@@ -51,11 +51,13 @@ def main():
         plt.title("{0:.2f}".format(mean_squared_error(y_true=target[counter], y_pred=img)))
     plt.show()
 
+    norm_mse_result: np.ndarray = np.zeros(shape=result.shape[0], dtype=float)
     plt.figure(figsize=(7, 6))
     for counter, img in enumerate(result):
         plt.subplot(5, 4, counter + 1)
         plt.imshow(img)
-        plt.title("{0:.2f}".format(mean_squared_error(y_true=target[counter], y_pred=img)))
+        norm_mse_result[counter] = mean_squared_error(y_true=target[counter], y_pred=img)
+        plt.title("{0:.4f}".format(norm_mse_result[counter]))
     plt.show()
 
     indexes: np.ndarray = np.arange(start=0, stop=abno_test.shape[0], dtype=int)
@@ -71,12 +73,17 @@ def main():
         plt.title("{0:.2f}".format(mean_squared_error(y_true=target[counter], y_pred=img)))
     plt.show()
 
+    abno_mse_result: np.ndarray = np.zeros(shape=result.shape[0], dtype=float)
     plt.figure(figsize=(7, 6))
     for counter, img in enumerate(result):
         plt.subplot(5, 4, counter + 1)
         plt.imshow(img)
-        plt.title("{0:.2f}".format(mean_squared_error(y_true=target[counter], y_pred=img)))
+        abno_mse_result[counter] = mean_squared_error(y_true=target[counter], y_pred=img)
+        plt.title("{0:.4f}".format(abno_mse_result[counter]))
     plt.show()
+
+    print('norm mse', norm_mse_result.mean(), norm_mse_result.max(), norm_mse_result.min())
+    print('abno mse', abno_mse_result.mean(), abno_mse_result.max(), abno_mse_result.min())
 
 
 if __name__ == '__main__':

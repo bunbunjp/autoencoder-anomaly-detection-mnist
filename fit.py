@@ -6,26 +6,27 @@ from keras import Sequential
 from keras.datasets import mnist
 import numpy as np
 import matplotlib.pyplot as plt
-from keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Conv1D, MaxPooling1D, UpSampling1D, Dense, Flatten, Reshape
+from keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Conv1D, MaxPooling1D, UpSampling1D, Dense, Flatten, \
+    Reshape, BatchNormalization
 
 
 def create_model(target: np.ndarray) -> Sequential:
     ae: Sequential = Sequential()
-    ae.add(Conv2D(8, (7, 7), activation='relu', padding='same', input_shape=(target.shape[1], target.shape[2], 1)))
-    ae.add(MaxPooling2D((7, 7), padding='same'))
-    ae.add(Conv2D(4, (1, 1), activation='relu', padding='same'))
-    ae.add(MaxPooling2D((1, 1), padding='same'))
-    ae.add(Conv2D(4, (1, 1), activation='relu', padding='same'))
-    ae.add(MaxPooling2D((1, 1), padding='same'))
+    ae.add(Conv2D(16, (3, 3), activation='relu', padding='same', input_shape=(target.shape[1], target.shape[2], 1)))
+    ae.add(MaxPooling2D((2, 2), padding='same'))
+    ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    ae.add(MaxPooling2D((2, 2), padding='same'))
+    ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    ae.add(MaxPooling2D((2, 2), padding='same'))
 
-    ae.add(Conv2D(4, (1, 1), activation='relu', padding='same'))
-    ae.add(UpSampling2D((1, 1)))
-    ae.add(Conv2D(4, (1, 1), activation='relu', padding='same'))
-    ae.add(UpSampling2D((1, 1)))
-    ae.add(Conv2D(8, (7, 7), activation='relu', padding='same'))
-    ae.add(UpSampling2D((7, 7)))
-
-    ae.add(Conv2D(1, (7, 7), activation='relu', padding='same'))
+    # Decoder
+    ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    ae.add(UpSampling2D((2, 2)))
+    ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    ae.add(UpSampling2D((2, 2)))
+    ae.add(Conv2D(16, (3, 3), activation='relu'))
+    ae.add(UpSampling2D((2, 2)))
+    ae.add(Conv2D(1, (3, 3), activation='relu', padding='same'))
 
     ae.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
     ae.summary()
@@ -56,16 +57,17 @@ def load_normaly_data() -> Tuple[np.ndarray, np.ndarray]:
 def main():
     norm_x, test_x = load_normaly_data()
     ae: Sequential = create_model(norm_x)
-    stack = ae.fit(x=norm_x, y=norm_x, verbose=1, epochs=5, validation_data=(test_x, test_x), batch_size=256)
+    epoch: int = 10
+    stack = ae.fit(x=norm_x, y=norm_x, verbose=1, epochs=epoch, validation_data=(test_x, test_x), batch_size=128)
     ae.save(filepath='fitted.h5', overwrite=True)
 
     plt.subplot(1, 2, 1)
-    plt.plot(range(5), stack.history['acc'], label="acc")
-    plt.plot(range(5), stack.history['val_acc'], label="val_acc")
+    plt.plot(range(epoch), stack.history['acc'], label="acc")
+    plt.plot(range(epoch), stack.history['val_acc'], label="val_acc")
 
     plt.subplot(1, 2, 2)
-    plt.plot(range(5), stack.history['loss'], label="loss")
-    plt.plot(range(5), stack.history['val_loss'], label="val_loss")
+    plt.plot(range(epoch), stack.history['loss'], label="loss")
+    plt.plot(range(epoch), stack.history['val_loss'], label="val_loss")
     plt.show()
 
 
