@@ -38,52 +38,56 @@ def main():
     ae: Sequential = create_model(target=x_norm)
     ae.load_weights(filepath='fitted.h5')
 
+    order_length: int = 25
+    column: Tuple[int, int] = (5, order_length / 5)
     indexes: np.ndarray = np.arange(start=0, stop=norm_test.shape[0], dtype=int)
-    target: np.ndarray = norm_test[np.random.choice(indexes, 20, replace=False)]
+    target: np.ndarray = norm_test[np.random.choice(indexes, order_length, replace=False)]
     result: np.ndarray = ae.predict(x=target)
     target = np.reshape(a=target, newshape=(target.shape[0], target.shape[1], target.shape[2]))
     result = np.reshape(a=result, newshape=(result.shape[0], result.shape[1], result.shape[2]))
 
     plt.figure(figsize=(7, 6))
     for counter, img in enumerate(target):
-        plt.subplot(5, 4, counter + 1)
+        plt.subplot(column[0], column[1], counter + 1)
         plt.imshow(img)
-        plt.title("{0:.2f}".format(mean_squared_error(y_true=target[counter], y_pred=img)))
+        plt.title(" ")
     plt.show()
 
     norm_mse_result: np.ndarray = np.zeros(shape=result.shape[0], dtype=float)
     plt.figure(figsize=(7, 6))
     for counter, img in enumerate(result):
-        plt.subplot(5, 4, counter + 1)
+        plt.subplot(column[0], column[1], counter + 1)
         plt.imshow(img)
         norm_mse_result[counter] = mean_squared_error(y_true=target[counter], y_pred=img)
         plt.title("{0:.4f}".format(norm_mse_result[counter]))
     plt.show()
 
     indexes: np.ndarray = np.arange(start=0, stop=abno_test.shape[0], dtype=int)
-    target: np.ndarray = abno_test[np.random.choice(indexes, 20, replace=False)]
+    target: np.ndarray = abno_test[np.random.choice(indexes, order_length, replace=False)]
     result: np.ndarray = ae.predict(x=target)
     target = np.reshape(a=target, newshape=(target.shape[0], target.shape[1], target.shape[2]))
     result = np.reshape(a=result, newshape=(result.shape[0], result.shape[1], result.shape[2]))
 
     plt.figure(figsize=(7, 6))
     for counter, img in enumerate(target):
-        plt.subplot(5, 4, counter + 1)
+        plt.subplot(column[0], column[1], counter + 1)
         plt.imshow(img)
-        plt.title("{0:.2f}".format(mean_squared_error(y_true=target[counter], y_pred=img)))
+        plt.title(" ")
     plt.show()
 
     abno_mse_result: np.ndarray = np.zeros(shape=result.shape[0], dtype=float)
     plt.figure(figsize=(7, 6))
     for counter, img in enumerate(result):
-        plt.subplot(5, 4, counter + 1)
+        plt.subplot(column[0], column[1], counter + 1)
         plt.imshow(img)
         abno_mse_result[counter] = mean_squared_error(y_true=target[counter], y_pred=img)
         plt.title("{0:.4f}".format(abno_mse_result[counter]))
     plt.show()
 
-    print('norm mse', norm_mse_result.mean(), norm_mse_result.max(), norm_mse_result.min())
-    print('abno mse', abno_mse_result.mean(), abno_mse_result.max(), abno_mse_result.min())
+    print('norm mse {0:.5f}, {1:.5f}, {2:.5f}'.format(norm_mse_result.mean(), norm_mse_result.max(),
+                                                      norm_mse_result.min()))
+    print('abno mse {0:.5f}, {1:.5f}, {2:.5f}'.format(abno_mse_result.mean(), abno_mse_result.max(),
+                                                      abno_mse_result.min()))
 
 
 if __name__ == '__main__':

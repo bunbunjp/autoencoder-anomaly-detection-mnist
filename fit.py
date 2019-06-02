@@ -14,18 +14,29 @@ def create_model(target: np.ndarray) -> Sequential:
     ae: Sequential = Sequential()
     ae.add(Conv2D(16, (3, 3), activation='relu', padding='same', input_shape=(target.shape[1], target.shape[2], 1)))
     ae.add(MaxPooling2D((2, 2), padding='same'))
+
+    # ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    # ae.add(MaxPooling2D((2, 2), padding='same'))
+    #
+    # ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    # ae.add(MaxPooling2D((2, 2), padding='same'))
+
     ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-    ae.add(MaxPooling2D((2, 2), padding='same'))
-    ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-    ae.add(MaxPooling2D((2, 2), padding='same'))
+    ae.add(MaxPooling2D((4, 4), padding='same'))
 
     # Decoder
     ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-    ae.add(UpSampling2D((2, 2)))
-    ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-    ae.add(UpSampling2D((2, 2)))
+    ae.add(UpSampling2D((4, 4)))
+
+    # ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    # ae.add(UpSampling2D((2, 2)))
+    #
+    # ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    # ae.add(UpSampling2D((2, 2)))
+
     ae.add(Conv2D(16, (3, 3), activation='relu'))
     ae.add(UpSampling2D((2, 2)))
+
     ae.add(Conv2D(1, (3, 3), activation='relu', padding='same'))
 
     ae.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
