@@ -68,7 +68,7 @@ def load_normaly_data() -> Tuple[np.ndarray, np.ndarray]:
 def main():
     norm_x, test_x = load_normaly_data()
     ae: Sequential = create_model(norm_x)
-    epoch: int = 10
+    epoch: int = 20
     stack = ae.fit(x=norm_x, y=norm_x, verbose=1, epochs=epoch, validation_data=(test_x, test_x), batch_size=128)
     ae.save(filepath='fitted.h5', overwrite=True)
 
