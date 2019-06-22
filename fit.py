@@ -8,38 +8,39 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Conv1D, MaxPooling1D, UpSampling1D, Dense, Flatten, \
     Reshape, BatchNormalization
+from keras.optimizers import Adam
 
 
 def create_model(target: np.ndarray) -> Sequential:
     ae: Sequential = Sequential()
-    ae.add(Conv2D(16, (3, 3), activation='relu', padding='same', input_shape=(target.shape[1], target.shape[2], 1)))
+    kernel_size: Tuple[int, int] = (3, 3)
+    filters: int = 32
+    ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same',
+                  input_shape=(target.shape[1], target.shape[2], 1)))
     ae.add(MaxPooling2D((2, 2), padding='same'))
+    ae.add(BatchNormalization())
 
-    # ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-    # ae.add(MaxPooling2D((2, 2), padding='same'))
-    #
-    # ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-    # ae.add(MaxPooling2D((2, 2), padding='same'))
-
-    ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same'))
     ae.add(MaxPooling2D((4, 4), padding='same'))
+    ae.add(BatchNormalization())
 
     # Decoder
-    ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
+    ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same'))
     ae.add(UpSampling2D((4, 4)))
+    ae.add(BatchNormalization())
 
-    # ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-    # ae.add(UpSampling2D((2, 2)))
-    #
-    # ae.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-    # ae.add(UpSampling2D((2, 2)))
-
-    ae.add(Conv2D(16, (3, 3), activation='relu'))
+    ae.add(Conv2D(filters, kernel_size, activation='relu'))
     ae.add(UpSampling2D((2, 2)))
+    ae.add(BatchNormalization())
 
-    ae.add(Conv2D(1, (3, 3), activation='relu', padding='same'))
+    ae.add(Conv2D(1, kernel_size, activation='relu', padding='same'))
+    ae.add(BatchNormalization())
+    ae.add(Conv2D(1, kernel_size, activation='relu', padding='same'))
+    ae.add(BatchNormalization())
+    ae.add(Conv2D(1, kernel_size, activation='relu', padding='same'))
+    ae.add(BatchNormalization())
 
-    ae.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+    ae.compile(loss='mse', optimizer=Adam(lr=0.0001), metrics=['accuracy'])
     ae.summary()
     return ae
 
@@ -68,8 +69,9 @@ def load_normaly_data() -> Tuple[np.ndarray, np.ndarray]:
 def main():
     norm_x, test_x = load_normaly_data()
     ae: Sequential = create_model(norm_x)
-    epoch: int = 20
-    stack = ae.fit(x=norm_x, y=norm_x, verbose=1, epochs=epoch, validation_data=(test_x, test_x), batch_size=128)
+    epoch: int = 100
+    stack = ae.fit(x=norm_x, y=norm_x, verbose=1, epochs=epoch,
+                   shuffle=True, validation_data=(test_x, test_x), batch_size=256)
     ae.save(filepath='fitted.h5', overwrite=True)
 
     plt.subplot(1, 2, 1)

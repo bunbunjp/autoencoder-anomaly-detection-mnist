@@ -71,11 +71,13 @@ def main():
         plt.subplot(column[0], column[1], counter + 1)
         norm_mse_result[counter] = mse_value
         color_img: np.ndarray = convert_3dim_img(img=img)
-        if mse_value > 0.02:
-            color_img[:, :, 0] = 255
+        # if mse_value >= threshold:
+        #     color_img[:, :, 0] = 255
         plt.title('{0:.4f}'.format(mse_value))
         plt.imshow(color_img)
     plt.show()
+
+    threshold: float = norm_mse_result.max()
 
     indexes: np.ndarray = np.arange(start=0, stop=abno_test.shape[0], dtype=int)
     target: np.ndarray = abno_test[np.random.choice(indexes, order_length, replace=False)]
@@ -97,7 +99,7 @@ def main():
         abno_mse_result[counter] = mse_value
         plt.subplot(column[0], column[1], counter + 1)
         color_img: np.ndarray = convert_3dim_img(img=img)
-        if mse_value > 0.02:
+        if mse_value >= threshold:
             color_img[:, :, 0] = 255
         plt.title('{0:.4f}'.format(mse_value))
         plt.imshow(color_img)
