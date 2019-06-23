@@ -70,15 +70,9 @@ def main():
     norm_x, test_x = load_normaly_data()
     ae: Sequential = create_model(norm_x)
     epoch: int = 100
-    stack = ae.fit(x=norm_x, y=norm_x, verbose=1, epochs=epoch,
-                   shuffle=True, validation_data=(test_x, test_x), batch_size=256)
+    stack = ae.fit(x=norm_x, y=norm_x, verbose=1, epochs=epoch, validation_data=(test_x, test_x), batch_size=256)
     ae.save(filepath='fitted.h5', overwrite=True)
 
-    plt.subplot(1, 2, 1)
-    plt.plot(range(epoch), stack.history['acc'], label="acc")
-    plt.plot(range(epoch), stack.history['val_acc'], label="val_acc")
-
-    plt.subplot(1, 2, 2)
     plt.plot(range(epoch), stack.history['loss'], label="loss")
     plt.plot(range(epoch), stack.history['val_loss'], label="val_loss")
     plt.show()
