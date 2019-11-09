@@ -7,7 +7,7 @@ from keras.datasets import mnist
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Conv1D, MaxPooling1D, UpSampling1D, Dense, Flatten, \
-    Reshape, BatchNormalization
+    Reshape, BatchNormalization, Dropout
 from keras.optimizers import Adam
 
 
@@ -17,30 +17,46 @@ def create_model(target: np.ndarray) -> Sequential:
     filters: int = 32
     ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same',
                   input_shape=(target.shape[1], target.shape[2], 1)))
+    ae.add(Conv2D(filters * 2, kernel_size, activation='relu', padding='same'))
     ae.add(MaxPooling2D((2, 2), padding='same'))
     ae.add(BatchNormalization())
 
     ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same'))
-    ae.add(MaxPooling2D((4, 4), padding='same'))
+    ae.add(MaxPooling2D((2, 2), padding='same'))
     ae.add(BatchNormalization())
+
+    ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same'))
+    ae.add(MaxPooling2D((2, 2), padding='same'))
+    ae.add(BatchNormalization())
+
+    ae.add(Conv2D(filters * 2, kernel_size, activation='relu', padding='same'))
+    ae.add(Dropout(0.25))
+    ae.add(Conv2D(filters * 2, kernel_size, activation='relu', padding='same'))
+    ae.add(Dropout(0.25))
+    ae.add(Conv2D(filters * 2, kernel_size, activation='relu', padding='same'))
+    ae.add(Dropout(0.25))
+
 
     # Decoder
     ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same'))
-    ae.add(UpSampling2D((4, 4)))
+    ae.add(UpSampling2D((2, 2)))
+    ae.add(BatchNormalization())
+
+    ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same'))
+    ae.add(UpSampling2D((2, 2)))
     ae.add(BatchNormalization())
 
     ae.add(Conv2D(filters, kernel_size, activation='relu'))
     ae.add(UpSampling2D((2, 2)))
     ae.add(BatchNormalization())
 
-    ae.add(Conv2D(1, kernel_size, activation='relu', padding='same'))
-    ae.add(BatchNormalization())
-    ae.add(Conv2D(1, kernel_size, activation='relu', padding='same'))
-    ae.add(BatchNormalization())
-    ae.add(Conv2D(1, kernel_size, activation='relu', padding='same'))
+    ae.add(Conv2D(filters * 2, kernel_size, activation='relu', padding='same'))
+    ae.add(Conv2D(filters, kernel_size, activation='relu', padding='same'))
     ae.add(BatchNormalization())
 
-    ae.compile(loss='mse', optimizer=Adam(lr=0.0001), metrics=['accuracy'])
+    ae.add(Conv2D(1, kernel_size, activation='relu', padding='same'))
+
+    ae.compile(loss='mse', optimizer=Adam(lr=0.001), metrics=['accuracy'])
     ae.summary()
     return ae
 
@@ -69,8 +85,12 @@ def load_normaly_data() -> Tuple[np.ndarray, np.ndarray]:
 def main():
     norm_x, test_x = load_normaly_data()
     ae: Sequential = create_model(norm_x)
-    epoch: int = 100
-    stack = ae.fit(x=norm_x, y=norm_x, verbose=1, epochs=epoch, validation_data=(test_x, test_x), batch_size=256)
+    epoch: int = 30
+    stack = ae.fit(x=norm_x, y=norm_x,
+                   verbose=1,
+                   epochs=epoch,
+                   validation_data=(test_x, test_x),
+                   batch_size=256)
     ae.save(filepath='fitted.h5', overwrite=True)
 
     plt.plot(range(epoch), stack.history['loss'], label="loss")
